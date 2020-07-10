@@ -62,4 +62,12 @@ public class Individual {
 		}
 		return this.aabb.getArea();
 	}
+	
+	public float getDensity() {
+		double circleArea = 0;
+		for (Circle c : circles) {
+			circleArea += c.getArea();
+		}
+		return (float)(circleArea/this.getScore());
+	}
 }

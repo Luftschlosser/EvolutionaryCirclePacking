@@ -10,6 +10,7 @@ public class Statistics extends JPanel {
 
 	private JTextField generation;
 	private JTextField score;
+	private JTextField density;
 
 	public Statistics() {
 		this.setBackground(Color.LIGHT_GRAY);
@@ -25,6 +26,12 @@ public class Statistics extends JPanel {
 		this.score.setColumns(10);
 		this.score.setEditable(false);
 		this.add(score);
+		
+		this.add(new JLabel(" density:"));
+		this.density = new JTextField("-");
+		this.density.setColumns(10);
+		this.density.setEditable(false);
+		this.add(density);
 
 		this.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 	}
@@ -32,6 +39,7 @@ public class Statistics extends JPanel {
 	public void reset() {
 		this.generation.setText("0");
 		this.score.setText("-");
+		this.density.setText("-");
 	}
 
 	public void setGeneration(int g) {
@@ -40,5 +48,9 @@ public class Statistics extends JPanel {
 
 	public void setScore(float score) {
 		this.score.setText(Float.toString(score));
+	}
+	
+	public void setDensity(float density) {
+		this.density.setText(Float.toString(density));
 	}
 }

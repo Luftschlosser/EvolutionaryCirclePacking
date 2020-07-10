@@ -42,4 +42,8 @@ public class Circle {
 	public float getRight() {
 		return east;
 	}
+	
+	public double getArea() {
+		return Math.PI*(d/2)*(d/2);
+	}
 }

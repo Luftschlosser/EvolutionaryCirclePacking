@@ -24,6 +24,7 @@ public class Hillclimb {
 		this.statistics.reset();
 		this.circleCanvas.update(this.bestPhenotype, this.bestGenome);
 		this.statistics.setScore(this.bestPhenotype.getScore());
+		this.statistics.setDensity(this.bestPhenotype.getDensity());
 	}
 
 	public void start(int generations, int drawDelay) {
@@ -41,9 +42,11 @@ public class Hillclimb {
 		this.statistics.reset();
 		this.circleCanvas.update(this.bestPhenotype, this.bestGenome);
 		this.statistics.setScore(this.bestPhenotype.getScore());
+		this.statistics.setDensity(this.bestPhenotype.getDensity());
 
 		// run
 		for (gen = 0; gen <= generations; gen++) {
+			//TODO: Simulated Annealing
 			this.currentGenome.mutatePermutation(mutateRate);
 			this.currentGenome.mutateAngles(mutateRate, 180);
 			Individual newPhenotype = new Decoder(currentGenome).decode();
@@ -59,6 +62,7 @@ public class Hillclimb {
 				this.bestPhenotype = newPhenotype;
 				this.circleCanvas.update(this.bestPhenotype, this.bestGenome);
 				this.statistics.setScore(newScore);
+				this.statistics.setDensity(this.bestPhenotype.getDensity());
 				Thread.yield();
 				if (drawDelay > 0) {
 					try {
