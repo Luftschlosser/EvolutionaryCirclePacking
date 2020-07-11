@@ -72,7 +72,7 @@ public class Controls extends JPanel {
 
 		this.add(new JLabel(" Generations:"));
 		inputGenerations = new JFormattedTextField(int1Formatter);
-		inputGenerations.setText("1000");
+		inputGenerations.setText("5000");
 		inputGenerations.setColumns(8);
 		this.add(inputGenerations);
 

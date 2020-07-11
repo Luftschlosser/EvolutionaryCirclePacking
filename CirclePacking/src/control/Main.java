@@ -22,6 +22,7 @@ public class Main implements Runnable {
 	private Controls controls = new Controls();
 	private Statistics statistics = new Statistics();
 	private CircleCanvas canvas = new CircleCanvas(this.controls);
+	private EvolutionCanvas graph = new EvolutionCanvas();
 
 	AlgorithmType currentlyInitializedAlgorithmType = null;
 	private Hillclimb hillclimb;
@@ -39,6 +40,7 @@ public class Main implements Runnable {
 		frame.add(controls, BorderLayout.NORTH);
 		frame.add(statistics, BorderLayout.SOUTH);
 		tabpane.add("Phenotype", canvas);
+		tabpane.add("Evolution Graph", graph);
 		frame.add(tabpane, BorderLayout.CENTER);
 
 		frame.setSize(canvasWidth, canvasHeight);
@@ -87,7 +89,7 @@ public class Main implements Runnable {
 
 	public void initHillclimb() {
 		HillclimbGenome hillclimbGenome = new HillclimbGenome(this.controls.getN(), circleRadiusMin, circleRadiusMax);
-		this.hillclimb = new Hillclimb(hillclimbGenome, this.canvas, this.statistics);
+		this.hillclimb = new Hillclimb(hillclimbGenome, this.canvas, this.statistics, this.graph);
 		currentlyInitializedAlgorithmType = AlgorithmType.HILLCLIMB;
 	}
 }

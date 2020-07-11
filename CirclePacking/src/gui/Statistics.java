@@ -17,19 +17,19 @@ public class Statistics extends JPanel {
 
 		this.add(new JLabel("generation:"));
 		this.generation = new JTextField("0");
-		this.generation.setColumns(7);
+		this.generation.setColumns(6);
 		this.generation.setEditable(false);
 		this.add(generation);
 
 		this.add(new JLabel(" best score:"));
 		this.score = new JTextField("-");
-		this.score.setColumns(10);
+		this.score.setColumns(9);
 		this.score.setEditable(false);
 		this.add(score);
-		
+
 		this.add(new JLabel(" density:"));
 		this.density = new JTextField("-");
-		this.density.setColumns(10);
+		this.density.setColumns(6);
 		this.density.setEditable(false);
 		this.add(density);
 
@@ -49,8 +49,9 @@ public class Statistics extends JPanel {
 	public void setScore(float score) {
 		this.score.setText(Float.toString(score));
 	}
-	
+
 	public void setDensity(float density) {
-		this.density.setText(Float.toString(density));
+		String number = Float.toString(density * 100);
+		this.density.setText(number.substring(0, Math.min(6, number.length())) + " %");
 	}
 }
