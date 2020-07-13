@@ -18,10 +18,10 @@ public class HillclimbGenome extends Genome {
 		super(radius, angles, permutation);
 	}
 
-	public void mutatePermutation(float probability) {
+	public void mutatePermutation(BinaryDecisionSource permutate) {
 		int n = super.permutation.size();
 		for (int i = 0; i < n; i++) {
-			if (probability >= super.random.nextFloat()) {
+			if (permutate.nextDecision()) {
 				int otherIndex = super.random.nextInt(n);
 				int other = super.permutation.get(otherIndex);
 				int buf = super.permutation.get(i);
@@ -31,12 +31,12 @@ public class HillclimbGenome extends Genome {
 		}
 	}
 
-	public void mutateAngles(float probability, float range) {
+	public void mutateAngles(BinaryDecisionSource mutate, GaussianRangeSource range) {
 		int n = super.angles.size();
 		for (int i = 0; i < n; i++) {
-			if (probability >= super.random.nextFloat()) {
+			if (mutate.nextDecision()) {
 				float angle = super.angles.get(i);
-				angle += (super.random.nextGaussian() * range);
+				angle += range.nextRange();
 				angle %= 360;
 				super.angles.set(i, angle);
 			}

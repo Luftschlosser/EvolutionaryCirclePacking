@@ -54,15 +54,11 @@ public class EvolutionCanvas extends JPanel {
 		g.drawString(Integer.toString(this.generations), baseX - 10 + this.generations / xScale, baseY + 30);
 
 		g.setColor(Color.BLACK);
-		float minimum = yStop;
 		int lastX = baseX;
 		int lastY = topY;
 		for (int x = 1, index = 0; index < this.generations; index += xScale, x++) {
 			if (index < this.areas.size()) {
-				if (minimum > this.areas.get(index)) {
-					minimum = this.areas.get(index);
-				}
-				int coordinate = baseY - Math.round((minimum - this.yStart) * yScale);
+				int coordinate = baseY - Math.round((this.areas.get(index) - this.yStart) * yScale);
 				g.drawLine(baseX + x, coordinate, lastX, lastY);
 				lastX = baseX + x;
 				lastY = coordinate;
