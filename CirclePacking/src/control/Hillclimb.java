@@ -19,17 +19,8 @@ public class Hillclimb {
 		this.circleCanvas = circleCanvas;
 		this.statistics = statistics;
 		this.graph = graph;
-
-		this.bestGenome = this.currentGenome = this.initialGenome = initial;
-		this.bestPhenotype = new Decoder(currentGenome).decode();
-		this.bestScore = this.bestPhenotype.getScore();
-
-		this.statistics.reset();
-		this.circleCanvas.update(this.bestPhenotype, this.bestGenome);
-		this.statistics.setScore(this.bestPhenotype.getScore());
-		this.statistics.setDensity(this.bestPhenotype.getDensity());
-		this.graph.reset(1000/*dirty fix*/, this.bestPhenotype.getTotalArea(), this.bestPhenotype.getScore());
 		this.controls = controls;
+		this.bestGenome = this.currentGenome = this.initialGenome = initial;
 	}
 
 	public void start(BinaryDecisionSource permutationRate, BinaryDecisionSource angleMutationRate, GaussianRangeSource angleMutationRange) {
@@ -87,6 +78,6 @@ public class Hillclimb {
 		}
 
 		// after
-		System.out.println("Best Individual from " + --gen + " Generations: Area of " + this.bestScore + ", Density of " + this.bestPhenotype.getDensity() + "%.\n");
+		System.out.println("Best Individual from " + --gen + " Generations: Area of " + this.bestScore + ", Density of " + this.bestPhenotype.getDensity()*100 + "%.\n");
 	}
 }

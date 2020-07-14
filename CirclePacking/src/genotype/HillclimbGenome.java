@@ -4,12 +4,7 @@ import java.util.ArrayList;
 
 public class HillclimbGenome extends Genome {
 
-	// initialize with random radius
-	public HillclimbGenome(int n, float rmin, float rmax) {
-		super(n, rmin, rmax);
-	}
-
-	// initialize with given radius
+	
 	public HillclimbGenome(ArrayList<Float> radius) {
 		super(radius);
 	}
@@ -44,6 +39,6 @@ public class HillclimbGenome extends Genome {
 	}
 
 	public HillclimbGenome clone() {
-		return new HillclimbGenome(this.radius, this.angles, this.permutation);
+		return new HillclimbGenome(super.radius, super.angles, super.permutation);
 	}
 }

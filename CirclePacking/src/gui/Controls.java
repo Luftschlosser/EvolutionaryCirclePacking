@@ -24,6 +24,7 @@ public class Controls extends JPanel {
 	private JFormattedTextField inputN;
 	private JFormattedTextField inputDelay;
 	private JFormattedTextField inputGenerations;
+	private JFormattedTextField inputPopulation;
 
 	private JComboBox<AlgorithmType> algorithmChoose;
 
@@ -76,25 +77,31 @@ public class Controls extends JPanel {
 		inputGenerations.setColumns(8);
 		this.add(inputGenerations);
 
-		this.add(new JLabel(" delay:"));
+		this.add(new JLabel(" Delay:"));
 		inputDelay = new JFormattedTextField(int0Formatter);
 		inputDelay.setText("15");
-		inputDelay.setColumns(5);
+		inputDelay.setColumns(4);
 		this.add(inputDelay);
 
-		this.add(new JLabel(" algorithm:"));
+		this.add(new JLabel(" Algorithm:"));
 		algorithmChoose = new JComboBox<AlgorithmType>(new AlgorithmType[] { AlgorithmType.HILLCLIMB, AlgorithmType.GENETIC });
 		this.add(algorithmChoose);
+		
+		this.add(new JLabel(" Population:"));
+		inputPopulation = new JFormattedTextField(int1Formatter);
+		inputPopulation.setText("100");
+		inputPopulation.setColumns(4);
+		this.add(inputPopulation);
 
 		this.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 	}
 
 	public int getN() {
-		return Integer.parseInt(inputN.getText());
+		return Math.max(Integer.parseInt(inputN.getText()), 3);
 	}
 
 	public int getGenerations() {
-		return Integer.parseInt(inputGenerations.getText());
+		return Math.max(Integer.parseInt(inputGenerations.getText()), 10);
 	}
 
 	public int getDelay() {
@@ -103,6 +110,10 @@ public class Controls extends JPanel {
 
 	public AlgorithmType getChosenAlgorithm() {
 		return algorithmChoose.getItemAt(algorithmChoose.getSelectedIndex());
+	}
+	
+	public int getPopulation() {
+		return Math.max(Integer.parseInt(inputPopulation.getText()), 3);
 	}
 
 	public void onInit(ActionListener l) {

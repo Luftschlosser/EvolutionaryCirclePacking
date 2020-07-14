@@ -2,11 +2,13 @@ package control;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
 import genotype.*;
 import gui.*;
 import gui.Controls.AlgorithmType;
 import phenotype.*;
+
 
 public class Main implements Runnable {
 
@@ -25,9 +27,11 @@ public class Main implements Runnable {
 	private CircleCanvas canvas = new CircleCanvas(this.controls);
 	private EvolutionCanvas graph = new EvolutionCanvas();
 
-	private Hillclimb hillclimb;
+	private Hillclimb hillclimbAlgorithm;
+	private Genetic geneticAlgorithm;
 	boolean startExecution = false;
 
+	
 	public static void main(String[] args) {
 		main = new Main();
 		main.run();
@@ -67,12 +71,15 @@ public class Main implements Runnable {
 				Thread.yield();
 			}
 			this.startExecution = false;
+			
+			final float n = (float)this.controls.getN();
+			final int generations = this.controls.getGenerations();
+			BinaryDecisionSource permutationMutationRate;
+			BinaryDecisionSource angleMutationRate;
+			GaussianRangeSource angleMutationRange;
 
 			switch (this.controls.getChosenAlgorithm()) {
-			case HILLCLIMB:
-				float n = (float)this.controls.getN();
-				int generations = this.controls.getGenerations();
-				
+			case HILLCLIMB:				
 				System.out.println("Initializing Hillclimb:");
 				
 				double initialRate = 0.25;
@@ -81,11 +88,11 @@ public class Main implements Runnable {
 						+ "\tSimulated Annealing with initial rate of " + initialRate + ",\n"
 						+ "\tdampingFactor " + dampingBuf + ",\n"
 						+ "\t[target rate of "+ initialRate*Math.pow(dampingBuf, generations/2.0) +" after "+ generations/2 +" generations]");
-				BinaryDecisionSource permutationRate = new SimulatedAnnealing(0.25, dampingBuf);
+				permutationMutationRate = new AnnealingProbability(initialRate, dampingBuf);
 				
 				dampingBuf = Math.min(0.5, 3/n);
 				System.out.println("ņAngle-Mutationrate:\n\tConstant rate of " + dampingBuf +" (3/n)");
-				BinaryDecisionSource angleMutationRate = new ConstantProbability((float) dampingBuf);
+				angleMutationRate = new ConstantProbability((float) dampingBuf);
 				
 				initialRate = 360;
 				dampingBuf = findDampingFactor(generations, initialRate, 1);
@@ -93,20 +100,65 @@ public class Main implements Runnable {
 						+ "\tSimulated Annealing with initial range of " + initialRate + ",\n"
 						+ "\tdampingFactor " + dampingBuf + ",\n"
 						+ "\t[target range of "+ initialRate*Math.pow(dampingBuf, generations) +" after "+ generations +" generations]");
-				GaussianRangeSource angleMutationRange = new SimulatedAnnealing(360, dampingBuf);
+				angleMutationRange = new AnnealingProbability(initialRate, dampingBuf);
 				
-				hillclimb.start(permutationRate, angleMutationRate, angleMutationRange);
+				this.hillclimbAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
 				break;
+				
 			case GENETIC:
-				// Todo
+				System.out.println("Initializing genetic Algorithm:");
+				
+				float probability = (float) Math.min(0.5, 1.0/10);
+				System.out.println("ņPermutation-Mutationrate:\n\tConstant rate of " + probability +" (1/10)");
+				permutationMutationRate = new ConstantProbability((float) probability);
+				
+				probability = (float) Math.min(0.5, 1.0/2);
+				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + probability +" (1/5)");
+				angleMutationRate = new ConstantProbability((float) probability);
+				
+				double initial = 180;
+				double damping = findDampingFactor(generations, initial, 5);
+				System.out.println("Angle-Mutationrange:\n"
+						+ "\tSimulated Annealing with initial range of " + initial + ",\n"
+						+ "\tdampingFactor " + damping + ",\n"
+						+ "\t[target range of "+ initial*Math.pow(damping, generations) +" after "+ generations +" generations]");
+				angleMutationRange = new AnnealingProbability(initial, damping);
+				
+				this.geneticAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
 				break;
 			}
 		}
 	}
 
 	public void initRandom() {
-		HillclimbGenome hillclimbGenome = new HillclimbGenome(this.controls.getN(), circleRadiusMin, circleRadiusMax);
-		this.hillclimb = new Hillclimb(hillclimbGenome, this.canvas, this.statistics, this.graph, this.controls);
+		int n = this.controls.getN();
+		ArrayList<Float> radius = generateRandomRadius(n, circleRadiusMin, circleRadiusMax);
+		
+		HillclimbGenome hillclimbGenome = new HillclimbGenome(radius);
+		this.hillclimbAlgorithm = new Hillclimb(hillclimbGenome, this.canvas, this.statistics, this.graph, this.controls);
+		this.geneticAlgorithm = new Genetic(radius, this.canvas, this.statistics, this.graph, this.controls);
+		
+		//preview
+		Individual phenotype = new Decoder(hillclimbGenome).decode();
+		this.graph.reset(this.controls.getGenerations(), phenotype.getTotalArea(), phenotype.getScore());
+
+		this.canvas.reset();
+		this.canvas.update(phenotype, hillclimbGenome);
+		
+		this.statistics.reset();
+		this.statistics.setScore(phenotype.getScore());
+		this.statistics.setDensity(phenotype.getDensity());		
+	}
+	
+	
+	private static ArrayList<Float> generateRandomRadius(int n, float rmin, float rmax){
+		ArrayList<Float> radius = new ArrayList<Float>(n);
+		
+		for (int i = 0; i < n; i++) {
+			radius.add((float) ((rmax - rmin) * Math.random() + rmin));
+		}
+		
+		return radius;
 	}
 	
 	private static double logBaseN(double base, double arg) {
@@ -132,7 +184,7 @@ public class Main implements Runnable {
 			}
 			damping = (dampingMin + dampingMax) / 2;
 		}
-		while ((dampingMax - dampingMin) > epsilon);
+		while ((dampingMax - dampingMin) >= epsilon);
 		return damping;
 	}
 }

@@ -11,27 +11,6 @@ public class Genome {
 	protected ArrayList<Float> angles;
 	protected ArrayList<Integer> permutation;
 
-	// initialize with random radius
-	public Genome(int n, float rmin, float rmax) {
-		radius = new ArrayList<Float>(n);
-		angles = new ArrayList<Float>(n - 1);
-		permutation = new ArrayList<Integer>(n);
-
-		for (int i = 0; i < n; i++) {
-
-			int permutationIndex;
-			do {
-				permutationIndex = random.nextInt(n);
-			} while (permutation.contains(permutationIndex));
-			permutation.add(permutationIndex);
-
-			radius.add((float) ((rmax - rmin) * Math.random() + rmin));
-			if (i < (n - 1))
-				angles.add((float) (Math.random() * 360));
-		}
-	}
-
-	// initialize with given radius
 	public Genome(ArrayList<Float> radius) {
 		this.radius = radius;
 		int n = radius.size();
@@ -45,10 +24,13 @@ public class Genome {
 				permutationIndex = random.nextInt(n);
 			} while (permutation.contains(permutationIndex));
 			permutation.add(permutationIndex);
+			
+			if (i > 0) {
+				angles.add((float) (Math.random() * 360));
+			}
 		}
 	}
 
-	// clone-contructor
 	protected Genome(ArrayList<Float> radius, ArrayList<Float> angles, ArrayList<Integer> permutation) {
 		this.radius = radius;
 
