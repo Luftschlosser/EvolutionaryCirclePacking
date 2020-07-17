@@ -11,7 +11,7 @@ import javax.swing.text.NumberFormatter;
 public class Controls extends JPanel {
 
 	public enum AlgorithmType {
-		HILLCLIMB, GENETIC
+		LocalSearch, Genetic
 	}
 
 	private JCheckBox showVectors;
@@ -84,7 +84,7 @@ public class Controls extends JPanel {
 		this.add(inputDelay);
 
 		this.add(new JLabel(" Algorithm:"));
-		algorithmChoose = new JComboBox<AlgorithmType>(new AlgorithmType[] { AlgorithmType.HILLCLIMB, AlgorithmType.GENETIC });
+		algorithmChoose = new JComboBox<AlgorithmType>(new AlgorithmType[] { AlgorithmType.LocalSearch, AlgorithmType.Genetic });
 		this.add(algorithmChoose);
 		
 		this.add(new JLabel(" Population:"));

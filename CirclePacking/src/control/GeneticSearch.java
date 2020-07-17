@@ -6,7 +6,7 @@ import genotype.*;
 import gui.*;
 import phenotype.*;
 
-public class Genetic {
+public class GeneticSearch {
 	
 	private CircleCanvas circleCanvas;
 	private Statistics statistics;
@@ -20,7 +20,7 @@ public class Genetic {
 	private Random random;
 	
 
-	public Genetic(ArrayList<Float> radius, CircleCanvas circleCanvas, Statistics statistics, EvolutionCanvas graph, Controls controls) {
+	public GeneticSearch(ArrayList<Float> radius, CircleCanvas circleCanvas, Statistics statistics, EvolutionCanvas graph, Controls controls) {
 		this.circleCanvas = circleCanvas;
 		this.statistics = statistics;
 		this.graph = graph;
@@ -61,7 +61,7 @@ public class Genetic {
 			//making love
 			ArrayList<GeneticGenome> childs = new ArrayList<GeneticGenome>(populationSize);
 			for (int i = 0; i < populationSize; i++) {
-				ArrayList<Integer> parents = tournamentSelection(2, (populationSize/10)+1);
+				ArrayList<Integer> parents = rankbasedSelection(2); //tournamentSelection(2, (populationSize/8)+1);
 				GeneticGenome parent1 = this.populationGenotypes.get(parents.get(0));
 				GeneticGenome parent2 = this.populationGenotypes.get(parents.get(1));
 				childs.add(parent1.recombine(parent2));
@@ -73,24 +73,23 @@ public class Genetic {
 			
 			//mutate
 			for (GeneticGenome child : childs) {
-				if (permutationMutationRate.nextDecision()) {
-					child.mutatePermutation();
-				}
+				child.mutatePermutationBySwitch(permutationMutationRate);
 				if (angleMutationRate.nextDecision()) {
 					child.mutateAngle(angleMutationRange);
 				}
 			}
 			permutationMutationRate.incrementGeneration();
 			angleMutationRate.incrementGeneration();
-			angleMutationRange.incrementGeneration();
+			angleMutationRange.incrementGeneration();			
 			
-			//evaluate
 			this.populationGenotypes = childs;
 			this.populationPhenotypes = new ArrayList<Individual>(populationSize);
 			for (GeneticGenome child : childs) {
 				Decoder decoder = new Decoder(child);
 				this.populationPhenotypes.add(decoder.decode());
 			}
+			
+			//evaluate and update gui
 			int newBestIndex = getBestIndexFromPopulation();
 			Individual newBestPhenotype = this.populationPhenotypes.get(newBestIndex);
 			GeneticGenome newBestGenotype = this.populationGenotypes.get(newBestIndex);
@@ -162,6 +161,32 @@ public class Genetic {
 		for (int i = 0; i < numberOfWinners; i++) {
 			winners.add(winsPerIndividual.get(0).getKey());
 			winsPerIndividual.remove(0);
+		}
+		
+		return winners;
+	}
+	
+	private ArrayList<Integer> rankbasedSelection(int numberOfWinners) {
+		ArrayList<Integer> winners = new ArrayList<Integer>(numberOfWinners);
+		ArrayList<Entry<Float, Integer>> scorePerIndex = new ArrayList<Entry<Float, Integer>>(this.populationPhenotypes.size());
+		
+		for (int i = 0; i < this.populationPhenotypes.size(); i++) {
+			scorePerIndex.add(new MapEntry<Float, Integer>(this.populationPhenotypes.get(i).getScore(), i));
+		}
+		
+		scorePerIndex.sort((first, second) -> {
+			return Float.compare(first.getKey(), second.getKey());
+		});
+		
+		for (int winner = 0; winner < numberOfWinners; winner++) {
+			float rand = this.random.nextFloat();
+			for (int i = 0; i < scorePerIndex.size(); i++) {
+				rand -= 1.0/i;
+				if (rand < 0) {
+					winners.add(scorePerIndex.get(i).getValue());
+					break;
+				}
+			}
 		}
 		
 		return winners;

@@ -4,7 +4,7 @@ import genotype.*;
 import gui.*;
 import phenotype.*;
 
-public class Hillclimb {
+public class LocalSearch {
 
 	private HillclimbGenome bestGenome, currentGenome, initialGenome;
 	private float bestScore;
@@ -15,7 +15,7 @@ public class Hillclimb {
 	private EvolutionCanvas graph;
 	private Controls controls;
 
-	public Hillclimb(HillclimbGenome initial, CircleCanvas circleCanvas, Statistics statistics, EvolutionCanvas graph, Controls controls) {
+	public LocalSearch(HillclimbGenome initial, CircleCanvas circleCanvas, Statistics statistics, EvolutionCanvas graph, Controls controls) {
 		this.circleCanvas = circleCanvas;
 		this.statistics = statistics;
 		this.graph = graph;

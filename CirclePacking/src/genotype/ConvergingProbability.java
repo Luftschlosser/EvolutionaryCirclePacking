@@ -2,7 +2,7 @@ package genotype;
 
 import java.util.Random;
 
-public class AnnealingProbability implements BinaryDecisionSource, GaussianRangeSource {
+public class ConvergingProbability implements BinaryDecisionSource, GaussianRangeSource {
 	
 	private final double initialRate;
 	private final double dampingFactor;
@@ -10,7 +10,7 @@ public class AnnealingProbability implements BinaryDecisionSource, GaussianRange
 	private Random random;
 	
 	
-	public AnnealingProbability(double initialRate, double dampingFactor) {
+	public ConvergingProbability(double initialRate, double dampingFactor) {
 		this.initialRate = initialRate;
 		this.dampingFactor = dampingFactor;
 		this.currentRate = initialRate;

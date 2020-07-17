@@ -59,7 +59,7 @@ public class GeneticGenome extends Genome {
 		return new GeneticGenome(super.radius, newAngles, newPermutation);		
 	}
 	
-	public void mutatePermutation() {
+	public void mutatePermutationByMove() {
 		int n = super.permutation.size();
 		int from = Math.abs(super.random.nextInt() % n);
 		int to = Math.abs(super.random.nextInt() % n);
@@ -83,6 +83,19 @@ public class GeneticGenome extends Genome {
 			super.permutation.set(i-1, buf);
 		}
 		return;
+	}
+	
+	public void mutatePermutationBySwitch(BinaryDecisionSource permutate) {
+		int n = super.permutation.size();
+		for (int i = 0; i < n; i++) {
+			if (permutate.nextDecision()) {
+				int otherIndex = super.random.nextInt(n);
+				int other = super.permutation.get(otherIndex);
+				int buf = super.permutation.get(i);
+				super.permutation.set(i, other);
+				super.permutation.set(otherIndex, buf);
+			}
+		}
 	}
 
 	public void mutateAngle(GaussianRangeSource range) {
