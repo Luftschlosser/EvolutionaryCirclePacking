@@ -3,26 +3,20 @@ package genotype;
 import java.util.ArrayList;
 
 public class StrategyGenome extends Genome {
-	
-	private double sigma;
-	
-	public StrategyGenome(ArrayList<Float> radius, double sigma) {
-		super(radius);
-		this.sigma = sigma;
-	}
-
-	protected StrategyGenome(ArrayList<Float> radius, ArrayList<Float> angles, ArrayList<Integer> permutation, double sigma) {
-		super(radius, angles, permutation);
-		this.sigma = sigma;
-	}
-
-	public StrategyGenome getNewChild(BinaryDecisionSource permutationMutation, BinaryDecisionSource angleMutation) {
-		double newSigma = this.sigma * Math.exp(super.random.nextGaussian());
 		
+	public StrategyGenome(ArrayList<Float> radius, GaussianRangeSource angleMutationRange) {
+		super(radius);
+	}
+
+	protected StrategyGenome(ArrayList<Float> radius, ArrayList<Float> angles, ArrayList<Integer> permutation) {
+		super(radius, angles, permutation);
+	}
+
+	public StrategyGenome getNewChild(BinaryDecisionSource permutationMutation, BinaryDecisionSource angleMutation, GaussianRangeSource angleMutationRange) {
 		ArrayList<Float> newAngles = new ArrayList<Float>(super.angles.size());
 		for (Float angle : super.angles) {
 			if (angleMutation.nextDecision()) {
-				float newAngle = (float)(angle + newSigma * super.random.nextGaussian());
+				float newAngle = (float)(angle + angleMutationRange.nextRange());
 				newAngle %= 360;
 				newAngles.add(newAngle);
 			}
@@ -46,11 +40,11 @@ public class StrategyGenome extends Genome {
 			}
 		}
 		
-		StrategyGenome child = new StrategyGenome(super.radius, newAngles, newPermutation, newSigma);
+		StrategyGenome child = new StrategyGenome(super.radius, newAngles, newPermutation);
 		return child;
 	}
 
 	public StrategyGenome clone() {
-		return new StrategyGenome(super.radius, super.angles, super.permutation, this.sigma);
+		return new StrategyGenome(super.radius, super.angles, super.permutation);
 	}
 }

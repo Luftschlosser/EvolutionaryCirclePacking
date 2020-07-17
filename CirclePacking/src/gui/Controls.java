@@ -13,6 +13,10 @@ public class Controls extends JPanel {
 	public enum AlgorithmType {
 		LocalSearch, Genetic, Strategy
 	}
+	
+	public enum StrategyType {
+		Komma, Plus
+	}
 
 	private JCheckBox showVectors;
 	private ActionListener onShowVectors;
@@ -25,8 +29,10 @@ public class Controls extends JPanel {
 	private JFormattedTextField inputDelay;
 	private JFormattedTextField inputGenerations;
 	private JFormattedTextField inputPopulation;
+	private JFormattedTextField inputReproductionRate;
 
 	private JComboBox<AlgorithmType> algorithmChoose;
+	private JComboBox<StrategyType> strategyChoose;
 
 	public Controls() {
 
@@ -67,31 +73,65 @@ public class Controls extends JPanel {
 
 		this.add(new JLabel(" n:"));
 		inputN = new JFormattedTextField(int1Formatter);
-		inputN.setText("10");
+		inputN.setText("20");
 		inputN.setColumns(3);
 		this.add(inputN);
 
 		this.add(new JLabel(" Generations:"));
 		inputGenerations = new JFormattedTextField(int1Formatter);
-		inputGenerations.setText("5000");
+		inputGenerations.setText("1000");
 		inputGenerations.setColumns(8);
 		this.add(inputGenerations);
 
 		this.add(new JLabel(" Delay:"));
 		inputDelay = new JFormattedTextField(int0Formatter);
-		inputDelay.setText("15");
+		inputDelay.setText("0");
 		inputDelay.setColumns(4);
 		this.add(inputDelay);
 
 		this.add(new JLabel(" Algorithm:"));
 		algorithmChoose = new JComboBox<AlgorithmType>(new AlgorithmType[] { AlgorithmType.LocalSearch, AlgorithmType.Genetic, AlgorithmType.Strategy });
 		this.add(algorithmChoose);
+		algorithmChoose.addActionListener (new ActionListener () {
+		    public void actionPerformed(ActionEvent e) {
+		        switch (algorithmChoose.getItemAt(algorithmChoose.getSelectedIndex())) {
+		        case LocalSearch:
+		        	inputPopulation.setEnabled(false);
+		        	strategyChoose.setEnabled(false);
+		        	inputReproductionRate.setEnabled(false);
+		        	break;
+		        case Genetic:
+		        	inputPopulation.setEnabled(true);
+		        	strategyChoose.setEnabled(false);
+		        	inputReproductionRate.setEnabled(false);
+		        	break;
+		        case Strategy:
+		        	inputPopulation.setEnabled(true);
+		        	strategyChoose.setEnabled(true);
+		        	inputReproductionRate.setEnabled(true);
+		        	break;
+		        }
+		    }
+		});
 
 		this.add(new JLabel(" Population:"));
 		inputPopulation = new JFormattedTextField(int1Formatter);
 		inputPopulation.setText("100");
 		inputPopulation.setColumns(4);
 		this.add(inputPopulation);
+		inputPopulation.setEnabled(false);
+		
+		this.add(new JLabel(" Strategy:"));
+		strategyChoose = new JComboBox<StrategyType>(new StrategyType[] { StrategyType.Plus, StrategyType.Komma });
+		this.add(strategyChoose);
+		strategyChoose.setEnabled(false);
+		
+		this.add(new JLabel(" ReproductionRate:"));
+		inputReproductionRate = new JFormattedTextField(int1Formatter);
+		inputReproductionRate.setText("10");
+		inputReproductionRate.setColumns(4);
+		this.add(inputReproductionRate);
+		inputReproductionRate.setEnabled(false);
 
 		this.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 	}
@@ -114,6 +154,14 @@ public class Controls extends JPanel {
 
 	public int getPopulation() {
 		return Math.max(Integer.parseInt(inputPopulation.getText()), 3);
+	}
+	
+	public StrategyType getStrategyType() {
+		return strategyChoose.getItemAt(strategyChoose.getSelectedIndex());
+	}
+	
+	public int getReproductionRate() {
+		return Integer.parseInt(inputReproductionRate.getText());
 	}
 
 	public void onInit(ActionListener l) {

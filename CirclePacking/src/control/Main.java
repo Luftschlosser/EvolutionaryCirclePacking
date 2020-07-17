@@ -4,16 +4,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
-
-import control.StrategySearch.EvolutionStrategy;
 import genotype.*;
 import gui.*;
+import gui.Controls.AlgorithmType;
 import phenotype.*;
 
 public class Main implements Runnable {
 
-	private final static int canvasWidth = 1000;
-	private final static int canvasHeight = 800;
+	private final static int canvasWidth = 1400;
+	private final static int canvasHeight = 1000;
 
 	private final static float circleRadiusMin = 2.5f;
 	private final static float circleRadiusMax = 60f;
@@ -77,71 +76,59 @@ public class Main implements Runnable {
 			final float n = (float) this.controls.getN();
 			final int generations = this.controls.getGenerations();
 			double initialRate, dampingBuf;
-			float probability;
 
 			BinaryDecisionSource permutationMutationRate;
 			BinaryDecisionSource angleMutationRate;
 			GaussianRangeSource angleMutationRange;
-
-			switch (this.controls.getChosenAlgorithm()) {
-			case LocalSearch:
-				System.out.println("Initializing local Search:");
-
+			AlgorithmType algorithmType = this.controls.getChosenAlgorithm();
+			
+			System.out.println("Initializing evolution parameters:");
+			
+			if (algorithmType != AlgorithmType.Genetic) {
 				initialRate = 0.25;
 				dampingBuf = findDampingFactor(generations / 2.0f, initialRate, 1 / n);
 				System.out.println("\nPermutation-Mutationrate:\n" + "\tConverging probability with initial rate of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target rate of "
 						+ initialRate * Math.pow(dampingBuf, generations / 2.0) + " after " + generations / 2 + " generations]");
 				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
-
-				dampingBuf = Math.min(0.5, 3 / n);
-				System.out.println("ņAngle-Mutationrate:\n\tConstant rate of " + dampingBuf + " (3/n)");
+	
+				dampingBuf = Math.min(0.5, 4 / n);
+				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + dampingBuf + " (4/n)");
 				angleMutationRate = new ConstantProbability((float) dampingBuf);
-
+	
 				initialRate = 360;
-				dampingBuf = findDampingFactor(generations, initialRate, 1);
+				dampingBuf = findDampingFactor(generations, initialRate, 1.0);
 				System.out.println("Angle-Mutationrange:\n" + "\tConverging with initial range of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target range of " + initialRate * Math.pow(dampingBuf, generations) + " after "
 						+ generations + " generations]");
 				angleMutationRange = new ConvergingProbability(initialRate, dampingBuf);
-
-				this.localAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
-				break;
-
-			case Genetic:
-				System.out.println("Initializing genetic Algorithm:");
-
+			}
+			else {
 				initialRate = 2 / n;
 				dampingBuf = findDampingFactor(generations / 2.0f, initialRate, 1 / n);
 				System.out.println("\nPermutation-Mutationrate:\n" + "\tConverging probability with initial rate of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target rate of "
 						+ initialRate * Math.pow(dampingBuf, generations / 2.0) + " after " + generations / 2.0f + " generations]");
 				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
 
-				probability = 0.5f;
-				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + probability + " (1/5)");
-				angleMutationRate = new ConstantProbability((float) probability);
+				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + 0.5 + " (1/5)");
+				angleMutationRate = new ConstantProbability(0.5f);
 
 				initialRate = 240;
 				dampingBuf = findDampingFactor(generations, initialRate, 2);
 				System.out.println("Angle-Mutationrange:\n" + "\tConverging with initial range of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target range of " + initialRate * Math.pow(dampingBuf, generations) + " after "
 						+ generations + " generations]");
 				angleMutationRange = new ConvergingProbability(initialRate, dampingBuf);
+			}
 
+			
+			switch (this.controls.getChosenAlgorithm()) {
+			case LocalSearch:
+				this.localAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
+				break;
+			case Genetic:				
 				this.geneticAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
 				break;
-				
 			case Strategy:
-				System.out.println("Initializing self-adaptive Algorithm:");
-				
-				initialRate = 2 / n;
-				dampingBuf = findDampingFactor(generations / 2.0f, initialRate, 1 / n);
-				System.out.println("\nPermutation-Mutationrate:\n" + "\tConverging probability with initial rate of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target rate of "
-						+ initialRate * Math.pow(dampingBuf, generations / 2.0) + " after " + generations / 2.0f + " generations]");
-				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
-
-				probability = 0.5f;
-				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + probability + " (1/5)");
-				angleMutationRate = new ConstantProbability((float) probability);
-				
-				this.strategyAlgorithm.start(EvolutionStrategy.PLUS, 10, 360, permutationMutationRate, angleMutationRate);
+				this.strategyAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
+				break;
 			}
 		}
 	}

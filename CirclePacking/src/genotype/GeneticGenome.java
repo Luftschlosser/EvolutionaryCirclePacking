@@ -91,7 +91,7 @@ public class GeneticGenome extends Genome {
 					permutation = other.permutation.get(k++);
 				} while (newPermutation.contains(permutation));
 				newPermutation.set(i, permutation);
-				newAngles.set(i - 1, other.angles.get((k - 2) <= 0 ? 0 : k - 2));
+				newAngles.set(i - 1, (k - 2) > 0 ? other.angles.get(k - 2) : super.random.nextFloat() * 360);
 			}
 		}
 

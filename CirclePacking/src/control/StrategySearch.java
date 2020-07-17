@@ -4,15 +4,10 @@ import java.util.*;
 import java.util.Map.Entry;
 import genotype.*;
 import gui.*;
+import gui.Controls.StrategyType;
 import phenotype.*;
 
-public class StrategySearch {
-	
-	public enum EvolutionStrategy {
-		KOMMA,
-		PLUS
-	}
-	
+public class StrategySearch {	
 	
 	private CircleCanvas circleCanvas;
 	private Statistics statistics;
@@ -33,16 +28,16 @@ public class StrategySearch {
 		this.random = new Random();
 	}
 
-	public void start(EvolutionStrategy strategy, int childsPerParent, double sigma, BinaryDecisionSource permutationMutation, BinaryDecisionSource angleMutation) {
-		System.out.println("\nStarting self-adaptive Algorithm:");
+	public void start(BinaryDecisionSource permutationMutation, BinaryDecisionSource angleMutation, GaussianRangeSource angleMutationRange) {
+		System.out.println("\nStarting strategy Algorithm:");
 
 		// init
 		final int populationSize = this.controls.getPopulation();
 		final int generations = this.controls.getGenerations();
-		final int childsCount = populationSize * childsPerParent;
+		final int childsCount = populationSize * controls.getReproductionRate();
 		this.population = new ArrayList<Entry<Individual, StrategyGenome>>(populationSize);
 		for (int i = 0; i < populationSize; i++) {
-			StrategyGenome newGenome = new StrategyGenome(this.radius, sigma);
+			StrategyGenome newGenome = new StrategyGenome(this.radius, angleMutationRange);
 			Decoder decoder = new Decoder(newGenome);
 			this.population.add(new MapEntry<Individual, StrategyGenome>(decoder.decode(), newGenome));
 		}
@@ -64,13 +59,13 @@ public class StrategySearch {
 			// creating childs
 			ArrayList<Entry<Individual, StrategyGenome>> childs = new ArrayList<Entry<Individual, StrategyGenome>>(childsCount);
 			for (int i = 0; i < childsCount; i++) {
-				StrategyGenome parent = this.population.get(this.random.nextInt(this.population.size())).getValue();
-				StrategyGenome child = parent.getNewChild(permutationMutation, angleMutation);
+				StrategyGenome parent = tournamentSelection((int)Math.ceil(populationSize/2.0));//this.population.get(this.random.nextInt(this.population.size())).getValue();
+				StrategyGenome child = parent.getNewChild(permutationMutation, angleMutation, angleMutationRange);
 				childs.add(new MapEntry<Individual, StrategyGenome>(new Decoder(child).decode(), child));
 			}
 
 			// selecting best
-			if (strategy == EvolutionStrategy.PLUS) {
+			if (this.controls.getStrategyType() == StrategyType.Plus) {
 				childs.addAll(this.population);
 			}
 			childs.sort((first, second) -> {
@@ -97,6 +92,10 @@ public class StrategySearch {
 			this.statistics.setDensity(newBestPhenotype.getDensity());
 			this.statistics.setGeneration(gen);
 			System.out.println("Gen " + gen + ": " + newBestScore);
+			
+			permutationMutation.incrementGeneration();
+			angleMutation.incrementGeneration();
+			angleMutationRange.incrementGeneration();			
 
 			// pause
 			if (this.controls.getDelay() > 0) {
