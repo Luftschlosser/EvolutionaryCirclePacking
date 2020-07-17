@@ -141,7 +141,7 @@ public class GeneticGenome extends Genome {
 		int i = Math.abs(super.random.nextInt() % n);
 		float angle = super.angles.get(i);
 		angle += range.nextRange();
-		angle = angle % 360;
+		angle %= 360;
 		if (angle < 0) {
 			angle += 360;
 		}

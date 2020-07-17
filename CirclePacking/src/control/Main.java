@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
+
+import control.StrategySearch.EvolutionStrategy;
 import genotype.*;
 import gui.*;
 import phenotype.*;
@@ -25,8 +27,9 @@ public class Main implements Runnable {
 	private CircleCanvas canvas = new CircleCanvas(this.controls);
 	private EvolutionCanvas graph = new EvolutionCanvas();
 
-	private LocalSearch hillclimbAlgorithm;
+	private LocalSearch localAlgorithm;
 	private GeneticSearch geneticAlgorithm;
+	private StrategySearch strategyAlgorithm;
 	boolean startExecution = false;
 
 	public static void main(String[] args) {
@@ -57,7 +60,9 @@ public class Main implements Runnable {
 		controls.onStart(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				startExecution = true;
+				if (localAlgorithm != null && geneticAlgorithm != null && strategyAlgorithm != null) {
+					startExecution = true;
+				}
 			}
 		});
 	}
@@ -72,6 +77,7 @@ public class Main implements Runnable {
 			final float n = (float) this.controls.getN();
 			final int generations = this.controls.getGenerations();
 			double initialRate, dampingBuf;
+			float probability;
 
 			BinaryDecisionSource permutationMutationRate;
 			BinaryDecisionSource angleMutationRate;
@@ -97,7 +103,7 @@ public class Main implements Runnable {
 						+ generations + " generations]");
 				angleMutationRange = new ConvergingProbability(initialRate, dampingBuf);
 
-				this.hillclimbAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
+				this.localAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
 				break;
 
 			case Genetic:
@@ -109,7 +115,7 @@ public class Main implements Runnable {
 						+ initialRate * Math.pow(dampingBuf, generations / 2.0) + " after " + generations / 2.0f + " generations]");
 				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
 
-				float probability = (float) Math.min(0.5, 1.0 / 2);
+				probability = 0.5f;
 				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + probability + " (1/5)");
 				angleMutationRate = new ConstantProbability((float) probability);
 
@@ -121,6 +127,21 @@ public class Main implements Runnable {
 
 				this.geneticAlgorithm.start(permutationMutationRate, angleMutationRate, angleMutationRange);
 				break;
+				
+			case Strategy:
+				System.out.println("Initializing self-adaptive Algorithm:");
+				
+				initialRate = 2 / n;
+				dampingBuf = findDampingFactor(generations / 2.0f, initialRate, 1 / n);
+				System.out.println("\nPermutation-Mutationrate:\n" + "\tConverging probability with initial rate of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target rate of "
+						+ initialRate * Math.pow(dampingBuf, generations / 2.0) + " after " + generations / 2.0f + " generations]");
+				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
+
+				probability = 0.5f;
+				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + probability + " (1/5)");
+				angleMutationRate = new ConstantProbability((float) probability);
+				
+				this.strategyAlgorithm.start(EvolutionStrategy.PLUS, 10, 360, permutationMutationRate, angleMutationRate);
 			}
 		}
 	}
@@ -130,8 +151,9 @@ public class Main implements Runnable {
 		ArrayList<Float> radius = generateRandomRadius(n, circleRadiusMin, circleRadiusMax);
 
 		HillclimbGenome hillclimbGenome = new HillclimbGenome(radius);
-		this.hillclimbAlgorithm = new LocalSearch(hillclimbGenome, this.canvas, this.statistics, this.graph, this.controls);
+		this.localAlgorithm = new LocalSearch(hillclimbGenome, this.canvas, this.statistics, this.graph, this.controls);
 		this.geneticAlgorithm = new GeneticSearch(radius, this.canvas, this.statistics, this.graph, this.controls);
+		this.strategyAlgorithm = new StrategySearch(radius, this.canvas, this.statistics, this.graph, this.controls);
 
 		// preview
 		Individual phenotype = new Decoder(hillclimbGenome).decode();

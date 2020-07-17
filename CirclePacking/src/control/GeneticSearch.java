@@ -137,9 +137,8 @@ public class GeneticSearch {
 			ArrayList<Entry<Float, Integer>> scorePerIndex = new ArrayList<Entry<Float, Integer>>(numberOfOpponents + 1);
 
 			for (int i = 0; i <= numberOfOpponents; i++) {
-				int index = Math.abs(this.random.nextInt() % this.population.size());
-				GeneticGenome g = this.population.get(index).getValue();
-				Individual s = new Decoder(g).decode();
+				int index = this.random.nextInt(this.population.size());
+				Individual s = this.population.get(index).getKey();
 				scorePerIndex.add(new MapEntry<Float, Integer>(s.getScore(), index));
 			}
 
