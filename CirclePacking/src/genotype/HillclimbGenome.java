@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class HillclimbGenome extends Genome {
 
-	
 	public HillclimbGenome(ArrayList<Float> radius) {
 		super(radius);
 	}

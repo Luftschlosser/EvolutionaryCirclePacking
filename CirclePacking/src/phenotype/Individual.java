@@ -62,7 +62,7 @@ public class Individual {
 		}
 		return this.aabb.getArea();
 	}
-	
+
 	public float getTotalArea() {
 		double circleArea = 0;
 		for (Circle c : circles) {

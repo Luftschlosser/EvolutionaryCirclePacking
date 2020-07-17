@@ -7,18 +7,16 @@ import gui.*;
 import phenotype.*;
 
 public class GeneticSearch {
-	
+
 	private CircleCanvas circleCanvas;
 	private Statistics statistics;
 	private EvolutionCanvas graph;
 	private Controls controls;
-	
+
 	private ArrayList<Float> radius;
-	private ArrayList<GeneticGenome> populationGenotypes;
-	private ArrayList<Individual> populationPhenotypes;
-	
+	private ArrayList<Entry<Individual, GeneticGenome>> population;
+
 	private Random random;
-	
 
 	public GeneticSearch(ArrayList<Float> radius, CircleCanvas circleCanvas, Statistics statistics, EvolutionCanvas graph, Controls controls) {
 		this.circleCanvas = circleCanvas;
@@ -28,24 +26,22 @@ public class GeneticSearch {
 		this.radius = radius;
 		this.random = new Random();
 	}
-	
+
 	public void start(BinaryDecisionSource permutationMutationRate, BinaryDecisionSource angleMutationRate, GaussianRangeSource angleMutationRange) {
 		System.out.println("\nStarting genetic Algorithm:");
-		
-		//init
+
+		// init
 		final int populationSize = this.controls.getPopulation();
 		final int generations = this.controls.getGenerations();
-		this.populationGenotypes = new ArrayList<GeneticGenome>(populationSize);
-		this.populationPhenotypes = new ArrayList<Individual>(populationSize);
+		this.population = new ArrayList<Entry<Individual, GeneticGenome>>(populationSize);
 		for (int i = 0; i < populationSize; i++) {
 			GeneticGenome newGenome = new GeneticGenome(this.radius);
 			Decoder decoder = new Decoder(newGenome);
-			this.populationGenotypes.add(newGenome);
-			this.populationPhenotypes.add(decoder.decode());
+			this.population.add(new MapEntry<Individual, GeneticGenome>(decoder.decode(), newGenome));
 		}
 		final int bestIndex = getBestIndexFromPopulation();
-		Individual bestPhenotype = this.populationPhenotypes.get(bestIndex);
-		GeneticGenome bestGenotype = this.populationGenotypes.get(bestIndex);
+		Individual bestPhenotype = this.population.get(bestIndex).getKey();
+		GeneticGenome bestGenotype = this.population.get(bestIndex).getValue();
 		float bestScore = bestPhenotype.getScore();
 		this.statistics.reset();
 		this.statistics.setScore(bestScore);
@@ -53,46 +49,43 @@ public class GeneticSearch {
 		this.graph.reset(generations, bestPhenotype.getTotalArea(), bestScore);
 		this.circleCanvas.reset();
 		this.circleCanvas.update(bestPhenotype, bestGenotype);
-		
-		//run
+
+		// run
 		int gen = 0;
 		while (++gen <= generations) {
-			
-			//making love
-			ArrayList<GeneticGenome> childs = new ArrayList<GeneticGenome>(populationSize);
+
+			// making love
+			ArrayList<Entry<Individual, GeneticGenome>> childs = new ArrayList<Entry<Individual, GeneticGenome>>(populationSize);
 			for (int i = 0; i < populationSize; i++) {
-				ArrayList<Integer> parents = rankbasedSelection(2); //tournamentSelection(2, (populationSize/8)+1);
-				GeneticGenome parent1 = this.populationGenotypes.get(parents.get(0));
-				GeneticGenome parent2 = this.populationGenotypes.get(parents.get(1));
-				childs.add(parent1.recombine(parent2));
+				ArrayList<Integer> parents = tournamentSelection(2, (populationSize / 8) + 1);
+				GeneticGenome parent1 = this.population.get(parents.get(0)).getValue();
+				GeneticGenome parent2 = this.population.get(parents.get(1)).getValue();
+				GeneticGenome child1 = parent1.recombineByAngle(parent2);
+				childs.add(new MapEntry<Individual, GeneticGenome>(new Decoder(child1).decode(), child1));
 				i++;
 				if (i < populationSize) {
-					childs.add(parent2.recombine(parent1));
+					GeneticGenome child2 = parent2.recombineByAngle(parent1);
+					childs.add(new MapEntry<Individual, GeneticGenome>(new Decoder(child2).decode(), child2));
 				}
 			}
-			
-			//mutate
-			for (GeneticGenome child : childs) {
-				child.mutatePermutationBySwitch(permutationMutationRate);
+
+			// mutate
+			for (Entry<Individual, GeneticGenome> child : childs) {
+				child.getValue().mutatePermutationBySwitch(permutationMutationRate);
 				if (angleMutationRate.nextDecision()) {
-					child.mutateAngle(angleMutationRange);
+					child.getValue().mutateAngle(angleMutationRange);
 				}
 			}
 			permutationMutationRate.incrementGeneration();
 			angleMutationRate.incrementGeneration();
-			angleMutationRange.incrementGeneration();			
-			
-			this.populationGenotypes = childs;
-			this.populationPhenotypes = new ArrayList<Individual>(populationSize);
-			for (GeneticGenome child : childs) {
-				Decoder decoder = new Decoder(child);
-				this.populationPhenotypes.add(decoder.decode());
-			}
-			
-			//evaluate and update gui
+			angleMutationRange.incrementGeneration();
+
+			this.population = childs;
+
+			// evaluate and update gui
 			int newBestIndex = getBestIndexFromPopulation();
-			Individual newBestPhenotype = this.populationPhenotypes.get(newBestIndex);
-			GeneticGenome newBestGenotype = this.populationGenotypes.get(newBestIndex);
+			Individual newBestPhenotype = this.population.get(newBestIndex).getKey();
+			GeneticGenome newBestGenotype = this.population.get(newBestIndex).getValue();
 			float newBestScore = newBestPhenotype.getScore();
 			if (newBestScore < bestScore) {
 				bestPhenotype = newBestPhenotype;
@@ -105,98 +98,93 @@ public class GeneticSearch {
 			this.statistics.setDensity(newBestPhenotype.getDensity());
 			this.statistics.setGeneration(gen);
 			System.out.println("Gen " + gen + ": " + newBestScore);
-			
-			//pause
+
+			// pause
 			if (this.controls.getDelay() > 0) {
 				try {
 					Thread.sleep(this.controls.getDelay());
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
-			else {
+			} else {
 				Thread.yield();
 			}
 		}
-		
-		//after
-		System.out.println("Best Individual from " + --gen + " Generations: Area of " + bestScore + ", Density of " + bestPhenotype.getDensity()*100 + "%.\n");
+
+		// after
+		System.out.println("Best Individual from " + --gen + " Generations: Area of " + bestScore + ", Density of " + bestPhenotype.getDensity() * 100 + "%.\n");
 	}
-	
+
 	private int getBestIndexFromPopulation() {
 		float bestScore = Float.MAX_VALUE;
 		int bestIndex = 0;
-		
-		for(int i = 0; i < this.populationPhenotypes.size(); i++){
-			float score = this.populationPhenotypes.get(i).getScore();
+
+		for (int i = 0; i < this.population.size(); i++) {
+			float score = this.population.get(i).getKey().getScore();
 			if (score < bestScore) {
 				bestScore = score;
 				bestIndex = i;
 			}
 		}
-		
+
 		return bestIndex;
 	}
-	
-	private ArrayList<Integer> tournamentSelection(int numberOfWinners, int numberOfOpponents){
+
+	private ArrayList<Integer> tournamentSelection(int numberOfWinners, int numberOfOpponents) {
 		ArrayList<Integer> winners = new ArrayList<Integer>(numberOfWinners);
-		ArrayList<Entry<Integer, Integer>> winsPerIndividual = new ArrayList< Entry<Integer, Integer>>(this.populationPhenotypes.size()); //Maps Index -> Wins
-		
-		for (int i = 0; i < this.populationPhenotypes.size(); i++) {
-			int wins = 0;
-			Individual testling = this.populationPhenotypes.get(i);
-			for (int o = 0; o < numberOfOpponents; o++) {
-				Individual opponent = this.populationPhenotypes.get(Math.abs(this.random.nextInt() % this.populationPhenotypes.size()));
-				if (testling.getScore() < opponent.getScore()) {
-					wins++;
-				}
+
+		for (int w = 0; w < numberOfWinners; w++) {
+			ArrayList<Entry<Float, Integer>> scorePerIndex = new ArrayList<Entry<Float, Integer>>(numberOfOpponents + 1);
+
+			for (int i = 0; i <= numberOfOpponents; i++) {
+				int index = Math.abs(this.random.nextInt() % this.population.size());
+				GeneticGenome g = this.population.get(index).getValue();
+				Individual s = new Decoder(g).decode();
+				scorePerIndex.add(new MapEntry<Float, Integer>(s.getScore(), index));
 			}
-			winsPerIndividual.add(new MapEntry<Integer, Integer>(i, wins));
+
+			scorePerIndex.sort((first, second) -> {
+				return Float.compare(first.getKey(), second.getKey());
+			});
+
+			winners.add(scorePerIndex.get(0).getValue());
 		}
-		
-		winsPerIndividual.sort((first, second) -> {
-	        return Integer.compare(second.getValue(), first.getValue());
-	    });
-		
-		for (int i = 0; i < numberOfWinners; i++) {
-			winners.add(winsPerIndividual.get(0).getKey());
-			winsPerIndividual.remove(0);
-		}
-		
+
 		return winners;
 	}
-	
-	private ArrayList<Integer> rankbasedSelection(int numberOfWinners) {
+
+	@SuppressWarnings("unused")
+	private ArrayList<Integer> rankSelection(int numberOfWinners) { // not suitable as it seems
 		ArrayList<Integer> winners = new ArrayList<Integer>(numberOfWinners);
-		ArrayList<Entry<Float, Integer>> scorePerIndex = new ArrayList<Entry<Float, Integer>>(this.populationPhenotypes.size());
-		
-		for (int i = 0; i < this.populationPhenotypes.size(); i++) {
-			scorePerIndex.add(new MapEntry<Float, Integer>(this.populationPhenotypes.get(i).getScore(), i));
+		ArrayList<Entry<Float, Integer>> scorePerIndex = new ArrayList<Entry<Float, Integer>>(this.population.size());
+
+		for (int i = 0; i < this.population.size(); i++) {
+			scorePerIndex.add(new MapEntry<Float, Integer>(this.population.get(i).getKey().getScore(), i));
 		}
-		
+
 		scorePerIndex.sort((first, second) -> {
 			return Float.compare(first.getKey(), second.getKey());
 		});
-		
+
 		for (int winner = 0; winner < numberOfWinners; winner++) {
 			float rand = this.random.nextFloat();
 			for (int i = 0; i < scorePerIndex.size(); i++) {
-				rand -= 1.0/i;
+				rand -= (2.0 / scorePerIndex.size()) * (1.0 - (i / (scorePerIndex.size() - 1.0)));
 				if (rand < 0) {
 					winners.add(scorePerIndex.get(i).getValue());
 					break;
 				}
 			}
 		}
-		
+
 		return winners;
 	}
-	
-	private class MapEntry<K,V> implements Entry<K,V> {
-		
+
+	private class MapEntry<K, V> implements Entry<K, V> {
+
 		private K key;
 		private V value;
-		
+
 		public MapEntry(K key, V value) {
 			this.key = key;
 			this.value = value;
@@ -217,6 +205,5 @@ public class GeneticSearch {
 			this.value = value;
 			return value;
 		}
-		
 	}
 }

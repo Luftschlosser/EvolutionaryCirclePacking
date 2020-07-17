@@ -24,7 +24,7 @@ public class Genome {
 				permutationIndex = random.nextInt(n);
 			} while (permutation.contains(permutationIndex));
 			permutation.add(permutationIndex);
-			
+
 			if (i > 0) {
 				angles.add((float) (Math.random() * 360));
 			}

@@ -86,7 +86,7 @@ public class Controls extends JPanel {
 		this.add(new JLabel(" Algorithm:"));
 		algorithmChoose = new JComboBox<AlgorithmType>(new AlgorithmType[] { AlgorithmType.LocalSearch, AlgorithmType.Genetic });
 		this.add(algorithmChoose);
-		
+
 		this.add(new JLabel(" Population:"));
 		inputPopulation = new JFormattedTextField(int1Formatter);
 		inputPopulation.setText("100");
@@ -111,7 +111,7 @@ public class Controls extends JPanel {
 	public AlgorithmType getChosenAlgorithm() {
 		return algorithmChoose.getItemAt(algorithmChoose.getSelectedIndex());
 	}
-	
+
 	public int getPopulation() {
 		return Math.max(Integer.parseInt(inputPopulation.getText()), 3);
 	}

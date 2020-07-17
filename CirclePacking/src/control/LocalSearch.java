@@ -24,7 +24,7 @@ public class LocalSearch {
 	}
 
 	public void start(BinaryDecisionSource permutationRate, BinaryDecisionSource angleMutationRate, GaussianRangeSource angleMutationRange) {
-		System.out.println("\nStarting Hillclimb:");
+		System.out.println("\nStarting local Search:");
 
 		// reset
 		int gen;
@@ -48,7 +48,7 @@ public class LocalSearch {
 			float newScore = newPhenotype.getScore();
 
 			System.out.println("Gen " + gen + ": " + newScore);
-			
+
 			if (newScore < this.bestScore) {
 				this.bestScore = newScore;
 				this.bestGenome = this.currentGenome;
@@ -62,22 +62,21 @@ public class LocalSearch {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-				}
-				else {
+				} else {
 					Thread.yield();
 				}
 			}
-			
+
 			this.statistics.setGeneration(gen);
 			this.graph.addValue(this.bestScore);
 			this.currentGenome = this.bestGenome.clone();
-			
+
 			permutationRate.incrementGeneration();
 			angleMutationRate.incrementGeneration();
 			angleMutationRange.incrementGeneration();
 		}
 
 		// after
-		System.out.println("Best Individual from " + --gen + " Generations: Area of " + this.bestScore + ", Density of " + this.bestPhenotype.getDensity()*100 + "%.\n");
+		System.out.println("Best Individual from " + --gen + " Generations: Area of " + this.bestScore + ", Density of " + this.bestPhenotype.getDensity() * 100 + "%.\n");
 	}
 }
