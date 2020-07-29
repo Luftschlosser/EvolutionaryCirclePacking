@@ -14,7 +14,7 @@ public class Genome {
 	public Genome(ArrayList<Float> radius) {
 		this.radius = radius;
 		int n = radius.size();
-		angles = new ArrayList<Float>(n - 1);
+		angles = new ArrayList<Float>(n);
 		permutation = new ArrayList<Integer>(n);
 
 		for (int i = 0; i < n; i++) {
@@ -25,9 +25,7 @@ public class Genome {
 			} while (permutation.contains(permutationIndex));
 			permutation.add(permutationIndex);
 
-			if (i > 0) {
-				angles.add((float) (Math.random() * 360));
-			}
+			angles.add((float) (Math.random() * 360));
 		}
 	}
 
@@ -48,11 +46,7 @@ public class Genome {
 	}
 
 	public float getAngle(int index) {
-		if (index <= 0) {
-			return 0;
-		} else {
-			return angles.get(index - 1);
-		}
+		return angles.get(permutation.get(index));
 	}
 
 	public int getN() {

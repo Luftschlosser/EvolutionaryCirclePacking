@@ -24,9 +24,7 @@ public class GeneticGenome extends Genome {
 		int i = 0;
 		while (i < crosspoint) {
 			newPermutation.add(super.permutation.get(i));
-			if (i > 0) {
-				newAngles.add(super.angles.get(i - 1));
-			}
+			newAngles.add(super.angles.get(i));
 			i++;
 		}
 
@@ -43,13 +41,7 @@ public class GeneticGenome extends Genome {
 			}
 
 			newPermutation.add(permutationBuf);
-			if (i > 0) {
-				if (k > 0 && k < n) {
-					newAngles.add(other.angles.get(k - 1));
-				} else {
-					newAngles.add(other.angles.get(i - 1));
-				}
-			}
+			newAngles.add(other.angles.get(k));
 			i++;
 		}
 
@@ -71,9 +63,8 @@ public class GeneticGenome extends Genome {
 		}
 
 		// Parent 1
-		newPermutation.add(super.permutation.get(0));
-		for (int i = 1; i < n; i++) {
-			float angle = super.angles.get(i - 1);
+		for (int i = 0; i < n; i++) {
+			float angle = super.angles.get(i);
 			if (angle >= min && angle <= max) {
 				newAngles.add(angle);
 				newPermutation.add(super.permutation.get(i));
@@ -84,14 +75,14 @@ public class GeneticGenome extends Genome {
 		}
 
 		// Parent 2
-		for (int i = 1, k = 0; i < n; i++) {
+		for (int i = 0, k = 0; i < n; i++) {
 			if (newPermutation.get(i) == null) {
 				int permutation;
 				do {
 					permutation = other.permutation.get(k++);
 				} while (newPermutation.contains(permutation));
 				newPermutation.set(i, permutation);
-				newAngles.set(i - 1, (k - 2) > 0 ? other.angles.get(k - 2) : super.random.nextFloat() * 360);
+				newAngles.set(i, other.angles.get(k - 1));
 			}
 		}
 

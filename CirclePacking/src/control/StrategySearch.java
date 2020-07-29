@@ -59,7 +59,7 @@ public class StrategySearch {
 			// creating childs
 			ArrayList<Entry<Individual, StrategyGenome>> childs = new ArrayList<Entry<Individual, StrategyGenome>>(childsCount);
 			for (int i = 0; i < childsCount; i++) {
-				StrategyGenome parent = tournamentSelection((int)Math.ceil(populationSize/2.0));//this.population.get(this.random.nextInt(this.population.size())).getValue();
+				StrategyGenome parent = tournamentSelection((int)Math.ceil(populationSize/2.0));
 				StrategyGenome child = parent.getNewChild(permutationMutation, angleMutation, angleMutationRange);
 				childs.add(new MapEntry<Individual, StrategyGenome>(new Decoder(child).decode(), child));
 			}
