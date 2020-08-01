@@ -18,6 +18,7 @@ public class Main implements Runnable {
 	private final static float circleRadiusMax = 60f;
 
 	private static Main main;
+	private static final boolean benchmark = true;
 
 	private JFrame frame = new JFrame("CirclePacking");
 	private JTabbedPane tabpane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -95,13 +96,13 @@ public class Main implements Runnable {
 				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + dampingBuf + " (4/n)");
 				angleMutationRate = new ConstantProbability((float) dampingBuf);
 	
-				initialRate = 360;
+				initialRate = 180;
 				dampingBuf = findDampingFactor(generations, initialRate, 1.0);
 				System.out.println("Angle-Mutationrange:\n" + "\tConverging with initial range of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target range of " + initialRate * Math.pow(dampingBuf, generations) + " after "
 						+ generations + " generations]");
 				angleMutationRange = new ConvergingProbability(initialRate, dampingBuf);
 			}
-			else {
+			else { //Genetic
 				initialRate = 2 / n;
 				dampingBuf = findDampingFactor(generations / 2.0f, initialRate, 1 / n);
 				System.out.println("\nPermutation-Mutationrate:\n" + "\tConverging probability with initial rate of " + initialRate + ",\n" + "\tdampingFactor " + dampingBuf + ",\n" + "\t[target rate of "
@@ -109,7 +110,7 @@ public class Main implements Runnable {
 				permutationMutationRate = new ConvergingProbability(initialRate, dampingBuf);
 
 				System.out.println("Angle-Mutationrate:\n\tConstant rate of " + 0.5 + " (1/5)");
-				angleMutationRate = new ConstantProbability(0.5f);
+				angleMutationRate = new ConstantProbability(0.25f);
 
 				initialRate = 240;
 				dampingBuf = findDampingFactor(generations, initialRate, 2);
@@ -157,10 +158,35 @@ public class Main implements Runnable {
 	private static ArrayList<Float> generateRandomRadius(int n, float rmin, float rmax) {
 		ArrayList<Float> radius = new ArrayList<Float>(n);
 
-		for (int i = 0; i < n; i++) {
-			radius.add((float) ((rmax - rmin) * Math.random() + rmin));
+		if (!benchmark) {
+			for (int i = 0; i < n; i++) {
+				radius.add((float) ((rmax - rmin) * Math.random() + rmin));
+			}
 		}
-
+		else {
+			radius.add(100f);
+			radius.add(17.157f);
+			radius.add(17.157f);
+			radius.add(17.157f);
+			radius.add(17.157f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(8.578f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+			radius.add(5.132f);
+		}
+	
 		return radius;
 	}
 
