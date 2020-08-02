@@ -1,0 +1,43 @@
+% Geschachtelte Sections
+\newcounter{sectionlevel}
+
+\newcommand{\nsecbegin}[1]
+{
+    \ifnum\value{sectionlevel} = 0
+    \PackageError{nsection}{Die minimale verschachtelungstiefe wurde unterschritten}
+    %\part{#1}%
+    \else
+    \ifcase\value{sectionlevel} 
+    \chapter{#1}
+    \or
+    \section{#1}
+    \or
+    \subsection{#1}
+    \or
+    \subsubsection{#1}
+    \or
+    \paragraph{#1}
+    \or
+    \subparagraph{#1}
+    \else
+    \PackageError{nsection}{Die maximale verschachtelungstiefe wurde ueberschritten}
+    \fi
+    \fi
+    \addtocounter{sectionlevel}{1}
+}
+
+\newcommand{\nsecend}
+{
+  \addtocounter{sectionlevel}{-1}
+}
+
+\newcommand{\nsecdocumentend}
+{
+	\ifnum\value{sectionlevel} = 1
+	\else
+	\PackageError{nsection}{Es fehlt eine nsecend-Anweisung}
+	\fi
+}
+
+\setcounter{sectionlevel}{1}
+
