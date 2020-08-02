@@ -18,7 +18,7 @@ public class Main implements Runnable {
 	private final static float circleRadiusMax = 60f;
 
 	private static Main main;
-	private static final boolean benchmark = true;
+	private static final boolean benchmark = false;
 
 	private JFrame frame = new JFrame("CirclePacking");
 	private JTabbedPane tabpane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
